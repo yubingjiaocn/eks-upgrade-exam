@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Scripts and Applications use for EKS upgrade exam
 
 ## Init
@@ -16,3 +17,6 @@ Another Flask app. When accessed, send request to backend for submission.
 
 Several lambda function for monitor test app #1 and keep record for examtakers. 
 
+=======
+# eks-upgrade-exam
+>>>>>>> 199dc710afbea0e233e6cb016693c3ce62b25364
