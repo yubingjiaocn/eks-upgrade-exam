@@ -12,6 +12,9 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "nodes"]
   verbs: ["get", "watch", "list"]
+- apiGroups: ["apps/v1"]  
+  resources: ["deployments", "daemonsets"]
+  verbs: ["get", "watch", "list"]
 --- 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -46,7 +49,7 @@ spec:
       - env:
         - name: CANDIDATE_NAME
           value: Anonymous
-        image: 600413481647.dkr.ecr.ap-southeast-1.amazonaws.com/exam-keepalive:0.1
+        image: 600413481647.dkr.ecr.ap-southeast-1.amazonaws.com/exam-keepalive:0.2
         name: exam-keepalive
         ports:
         - containerPort: 5000
