@@ -27,7 +27,7 @@
 #==============================================================================
 
 REPO_PATH = "https://github.com/yubingjiaocn/eks-upgrade-exam.git"
-ADD_URL = 
+ADD_URL = https://je5rwctnad.execute-api.ap-southeast-1.amazonaws.com/Prod/add_candidate
 
 
 read -p 'Please input your name in full Pinyin. (e.g. Yu Bingjiao) :' CANDIDATE_NAME
@@ -80,7 +80,6 @@ curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.21.2/2021-07-05/
 # set kubectl as executable, move to path, populate kubectl bash-completion
 chmod +x kubectl && sudo mv kubectl /usr/local/bin/
 echo "source <(kubectl completion bash)" >> ~/.bashrc
-echo "source <(kubectl completion bash | sed 's/kubectl/k/g')" >> ~/.bashrc
 
 # Install c9 for editing files in cloud9
 npm install -g c9
@@ -211,8 +210,6 @@ EOF
       --arg id "$ACCOUNT_ID" \
       '{Name: $cn, IngressURL: $url, AWSAccountID: $id}'  > /tmp/candidate.json
 
-    echo "{'Name': "$CANDIDATE_NAME", 'IngressURL': "$KEEPALIVE_INGRESS", 'AWSAccountID': $ACCOUNT_ID}" > /tmp/candidate.json
-  
     curl ${ADD_URL} -H "Content-Type: application/json" -X POST -d @/tmp/candidate.json
 
 elif [[ "${EKS_CLUSTER_NAME}" = "" ]]
@@ -244,4 +241,4 @@ eksctl create iamidentitymapping \
 rm -vf ${HOME}/.aws/credentials
 source ~/.bash_profile
 
-echo "Your exam begins now. Good luck. "
+echo "Your exam begins now. Good luck. For submission, run ./submit.sh"

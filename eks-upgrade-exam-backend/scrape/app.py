@@ -33,7 +33,7 @@ def scrape(item):
             for node in payload["nodes"]:
                 nodes_ver.append(int(node["version"][3:5]))
     
-            # Cut image tag ("602401143452.dkr.ecr.ap-southeast-1.amazonaws.com/eks/kube-proxy:v1.22.11-eksbuild.2" -> "v1.22.11-eksbuild.    2" -> "22")
+            # Cut image tag ("602401143452.dkr.ecr.ap-southeast-1.amazonaws.com/eks/kube-proxy:v1.22.11-eksbuild.2" -> "v1.22.11-eksbuild.2" -> "22")
             # TBD: I hardcoded kube-proxy, but can add something more
             kube_proxy_ver = int(payload["workloads"]["kube-proxy"].split(":")[1][3:5])
     
