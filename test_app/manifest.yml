@@ -1,0 +1,56 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: exam-test
+  namespace: exam
+spec:
+  selector:
+    matchLabels:
+      app: exam-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: exam-test
+    spec:
+      containers:
+      - image: 600413481647.dkr.ecr.ap-southeast-1.amazonaws.com/exam-test:0.1
+        name: exam-test
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: exam-test
+  namespace: exam
+spec:
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
+  type: ClusterIP
+  selector:
+    app: exam-test
+---        
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    kubernetes.io/ingress.class: alb
+  name: exam-test
+  namespace: exam
+  labels:
+    apps: exam-test
+spec:
+  rules:
+  - http:
+      paths:
+      - backend:
+            serviceName: exam-test
+            servicePort: 5000
+        path: /
+

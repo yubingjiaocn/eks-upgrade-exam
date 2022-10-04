@@ -93,6 +93,10 @@ curl -sSL https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 
 helm repo add eks https://aws.github.io/eks-charts
 helm repo update
 
+# Install kube-no-trouble
+
+sh -c "$(curl -sSL https://git.io/install-kubent)"
+
 #####################
 ##  Set Variables  ##
 #####################
