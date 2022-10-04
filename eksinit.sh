@@ -204,10 +204,17 @@ EOF
     kubectl apply --server-side -f keepalive/manifest.yml
     KEEPALIVE_INGRESS=$(kubectl get ingress exam-keepalive -n exam -o=jsonpath='{.status.loadBalancer.ingress[0].hostname}')
     echo "export KEEPALIVE_INGRESS=${KEEPALIVE_INGRESS}" | tee -a ~/.bash_profile
-  
-    curl ${ADD_URL} -H "Content-Type: application/json" -X POST -d "{'Name': "$CANDIDATE_NAME", 'IngressURL': "$KEEPALIVE_INGRESS", 'AWSAccountID': $ACCOUNT_ID}" 
-
     
+    jq -n \
+      --arg cn "$CANDIDATE_NAME" \
+      --arg url "$KEEPALIVE_INGRESS" \
+      --arg id "$ACCOUNT_ID" \
+      '{Name: $cn, IngressURL: $url, AWSAccountID: $id}'  > /tmp/candidate.json
+
+    echo "{'Name': "$CANDIDATE_NAME", 'IngressURL': "$KEEPALIVE_INGRESS", 'AWSAccountID': $ACCOUNT_ID}" > /tmp/candidate.json
+  
+    curl ${ADD_URL} -H "Content-Type: application/json" -X POST -d @/tmp/candidate.json
+
 elif [[ "${EKS_CLUSTER_NAME}" = "" ]]
 then
 

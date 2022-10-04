@@ -9,9 +9,11 @@ dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(tablename)
 
 def lambda_handler(event, context):
-    awsaccountid = event['AWSAccountID']
-    name = event['Name']
-    ingressurl = event['IngressURL']
+    #print(json.dumps(event, indent=2))
+    req = json.loads(event['body'])
+    awsaccountid = req['AWSAccountID']
+    name = req['Name']
+    ingressurl = req['IngressURL']
     start_timestamp = int(time.time())
 
     response = table.query(KeyConditionExpression=Key('AWSAccountID').eq(str(awsaccountid)))

@@ -15,29 +15,30 @@ session = requests.Session()
 session.mount('http://', HTTPAdapter(max_retries=3))
 
 def scrape(item):
-    json.dump(item)
     timestamp = int(time.time())
     url = item["IngressURL"]
     unreachable_count = item["Unreachable_Count"]
 
     # Scrap from cluster's exam application
-    resp = session.get(url, timeout=(0.3, 1))
-    if resp.ok:
-        payload = json.loads(resp.text)
-        # Cut cluster version ("22+" -> "22")
-        cluster_ver = int(payload["version"]["minor"][0:2])
-
-        # Cut node version ("v1.22.12-eks-ba74326" -> "22")
-        nodes_ver = []
-        for node in payload["nodes"]:
-            nodes_ver.append(int(node[3:5]))
-
-        # Cut image tag ("602401143452.dkr.ecr.ap-southeast-1.amazonaws.com/eks/kube-proxy:v1.22.11-eksbuild.2" -> "v1.22.11-eksbuild.2" -> "22")
-        # TBD: I hardcoded kube-proxy, but can add something more
-        kube_proxy_ver = int(payload["workloads"]["kube-proxy"].split(":")[1][3:5])
-
+    try:
+        resp = session.get(url, timeout=(0.3, 1))
+        if resp.ok:
+            payload = json.loads(resp.text)
+            print(json.dumps(payload))
+            # Cut cluster version ("22+" -> "22")
+            cluster_ver = int(payload["version"]["minor"][0:2])
+    
+            # Cut node version ("v1.22.12-eks-ba74326" -> "22")
+            nodes_ver = []
+            for node in payload["nodes"]:
+                nodes_ver.append(int(node["version"][3:5]))
+    
+            # Cut image tag ("602401143452.dkr.ecr.ap-southeast-1.amazonaws.com/eks/kube-proxy:v1.22.11-eksbuild.2" -> "v1.22.11-eksbuild.    2" -> "22")
+            # TBD: I hardcoded kube-proxy, but can add something more
+            kube_proxy_ver = int(payload["workloads"]["kube-proxy"].split(":")[1][3:5])
+    
     # When exam app is unreachable
-    else:
+    except requests.exceptions.RequestException:
         if timestamp - item["Start_Time"] < 120:
             print("Candidate " + item["AWSAccountID"] + " is in grace period")
         else:
@@ -53,7 +54,7 @@ def scrape(item):
 def lambda_handler(event, context):
     # Ignore submitted candidate
     response = table.scan(
-        FilterExpression=Attr('submitted').eq(False)
+        FilterExpression=Attr('Submitted').eq(False)
     )
     data = response['Items']
 
@@ -62,7 +63,7 @@ def lambda_handler(event, context):
         data.extend(response['Items'])
 
     count = len(data)
-    print(f"Current candidates: {count}")    
+    print(f"Current candidates: {count}")
 
     for item in data:
         scrape(item)

@@ -1,0 +1,11 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "eks-upgrade-exam-backend"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-v52hn38knuw2"
+s3_prefix = "eks-upgrade-exam-backend"
+region = "ap-southeast-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
