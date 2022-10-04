@@ -1,5 +1,6 @@
 {
     "yaml.schemas": {
-        "https://json.schemastore.org/yamllint.json": "untitled:Untitled-1"
+        "https://json.schemastore.org/yamllint.json": "untitled:Untitled-1",
+        "https://raw.githubusercontent.com/awslabs/goformation/master/schema/sam.schema.json": "file:///home/ubuntu/eks-upgrade-exam/eks-upgrade-exam-backend/template.yaml"
     }
 }
