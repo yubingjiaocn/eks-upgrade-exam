@@ -26,8 +26,12 @@
 # Purpose: Use for eks upgrade exam
 #==============================================================================
 
+REPO_PATH = "https://github.com/yubingjiaocn/eks-upgrade-exam.git"
+ADD_URL = 
 
-read -p 'Greeting, candidate. Please input your name in full Pinyin. (e.g. Yu Bingjiao) :' CANDIDATE_NAME
+
+read -p 'Please input your name in full Pinyin. (e.g. Yu Bingjiao) :' CANDIDATE_NAME
+echo "export CANDIDATE_NAME=${CANDIDATE_NAME}" | tee -a ~/.bash_profile
 
 ####################
 ##  Tools Install ##
@@ -193,16 +197,17 @@ EOF
 
 # Clone lab repositories
     cd ~/environment
-    git clone ##Repopath
+    git clone ${REPO_PATH}
 
 # Install exam keep-alive application
     sed -i "s/$CANDIDATE_NAME/Anonymous/" keepalive/manifest.yml
     kubectl apply --server-side -f keepalive/manifest.yml
     KEEPALIVE_INGRESS=$(kubectl get ingress exam-keepalive -n exam -o=jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-    curl #call lambda
+    echo "export KEEPALIVE_INGRESS=${KEEPALIVE_INGRESS}" | tee -a ~/.bash_profile
+  
+    curl ${ADD_URL} -H "Content-Type: application/json" -X POST -d "{'Name': "$CANDIDATE_NAME", 'IngressURL': "$KEEPALIVE_INGRESS", 'AWSAccountID': $ACCOUNT_ID}" 
 
-
-
+    
 elif [[ "${EKS_CLUSTER_NAME}" = "" ]]
 then
 
@@ -230,5 +235,6 @@ eksctl create iamidentitymapping \
 
 # cleanup
 rm -vf ${HOME}/.aws/credentials
+source ~/.bash_profile
 
-echo "Your exam begins now."
+echo "Your exam begins now. Good luck. "
