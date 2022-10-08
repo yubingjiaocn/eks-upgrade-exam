@@ -16,7 +16,7 @@ session.mount('http://', HTTPAdapter(max_retries=3))
 
 def scrape(item):
     timestamp = int(time.time())
-    url = item["IngressURL"]
+    url = "http://" + item["IngressURL"] + "/"
     unreachable_count = item["Unreachable_Count"]
 
     # Scrap from cluster's exam application
