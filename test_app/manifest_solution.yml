@@ -40,7 +40,6 @@ metadata:
     alb.ingress.kubernetes.io/healthcheck-path: /
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    kubernetes.io/ingress.class: alb
   name: exam-test
   namespace: exam
   labels:
@@ -55,5 +54,6 @@ spec:
             name: "exam-test"
             port:
               number: 5000
-        path: /*
+        path: /
+        pathType: Prefix
 
