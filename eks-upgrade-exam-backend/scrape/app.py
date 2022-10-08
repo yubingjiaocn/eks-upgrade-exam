@@ -37,6 +37,9 @@ def scrape(item):
             # TBD: I hardcoded kube-proxy, but can add something more
             kube_proxy_ver = int(payload["workloads"]["kube-proxy"].split(":")[1][3:5])
     
+            table.update_item(Key={'AWSAccountID': item["AWSAccountID"]},
+                      UpdateExpression='SET Last_Access = :val1, Unreachable_Count = :val2, Cluster_Ver = :val3, Nodes_Ver = :val4, Kube_Proxy_Ver = :val5',
+                      ExpressionAttributeValues={':val1': timestamp, ':val2': unreachable_count, ':val3': cluster_ver, ':val4': nodes_ver, ':val5': kube_proxy_ver})
     # When exam app is unreachable
     except requests.exceptions.RequestException:
         if timestamp - item["Start_Time"] < 120:
@@ -44,11 +47,11 @@ def scrape(item):
         else:
             print("Unable to connect to candidate " + item["AWSAccountID"] + " application")
             unreachable_count = unreachable_count + 1
-
+            table.update_item(Key={'AWSAccountID': item["AWSAccountID"]},
+                      UpdateExpression='SET Last_Access = :val1, Unreachable_Count = :val2',
+                      ExpressionAttributeValues={':val1': timestamp, ':val2': unreachable_count})
     # Write to DynamoDB
-    table.update_item(Key={'AWSAccountID': item["AWSAccountID"]},
-                      UpdateExpression='SET Last_Access = :val1, Unreachable_Count = :val2, Cluster_Ver = :val3, Nodes_Ver = :val4, Kube_Proxy_Ver = :val5',
-                      ExpressionAttributeValues={':val1': timestamp, ':val2': unreachable_count, ':val3': cluster_ver, ':val4': nodes_ver, ':val5': kube_proxy_ver})
+    
     return
 
 def lambda_handler(event, context):
