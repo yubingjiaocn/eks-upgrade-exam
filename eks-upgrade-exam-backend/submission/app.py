@@ -99,10 +99,11 @@ def lambda_handler(event, context):
     req = json.loads(event['body'])
 
     awsaccountid = req['AWSAccountID']
+    url = "http://" + req['URL'] + "/"
 
     query = table.get_item(Key={'AWSAccountID': str(awsaccountid)})['Item']
 
-    result = judge(query, req['URL'])
+    result = judge(query, url)
 
     if result["Final"]:
         timestamp = int(time.time())
