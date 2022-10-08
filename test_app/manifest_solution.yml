@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: exam-test
@@ -33,7 +33,7 @@ spec:
   selector:
     app: exam-test
 ---        
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
@@ -46,11 +46,14 @@ metadata:
   labels:
     apps: exam-test
 spec:
+  ingressClassName: alb
   rules:
   - http:
       paths:
       - backend:
-            serviceName: exam-test
-            servicePort: 5000
-        path: /
+          service:
+            name: "exam-test"
+            port:
+              number: 5000
+        path: /*
 

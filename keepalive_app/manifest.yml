@@ -49,7 +49,7 @@ spec:
       - env:
         - name: CANDIDATE_NAME
           value: Anonymous
-        image: 600413481647.dkr.ecr.ap-southeast-1.amazonaws.com/exam-keepalive:0.2
+        image: public.ecr.aws/i6v0m5n6/exam-keepalive:0.2
         name: exam-keepalive
         ports:
         - containerPort: 5000
