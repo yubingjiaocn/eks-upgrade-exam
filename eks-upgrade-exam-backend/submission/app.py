@@ -52,7 +52,7 @@ def judge(item, url):
             result["Access_Check"] = False
             passed = False
 
-    result["Unreachable_Count"] = item["Unreachable_Count"]
+    result["Unreachable_Count"] = int(item["Unreachable_Count"])
 
     # Check if PDB is configurated
     if item["PDB"] > 0:
@@ -151,17 +151,15 @@ def lambda_handler(event, context):
 
     query = table.get_item(Key={'AWSAccountID': str(awsaccountid)})['Item']
 
-    print(awsaccountid + "has submitted on " + timestamp)
+    print(awsaccountid + "has submitted on " + str(timestamp))
 
     result = judge(query, url)
 
     print(json.dumps(result))
 
-    if result["Final"]:
-
-        table.update_item(Key={'AWSAccountID': awsaccountid},
-                      UpdateExpression='SET Passed = :val1, Submitted_Time = :val2',
-                      ExpressionAttributeValues={':val1': True, ':val2': timestamp})
+    table.update_item(Key={'AWSAccountID': awsaccountid},
+                      UpdateExpression='SET Submitted = :val1, Passed = :val2, Submitted_Time = :val3',
+                      ExpressionAttributeValues={':val1': True, ':val2': result["Final"], ':val3': timestamp})
 
     result_str = generate_output(query['Name'], result)
 

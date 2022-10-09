@@ -26,6 +26,7 @@ def lambda_handler(event, context):
             'Start_Time': start_timestamp,
             'Last_Access': start_timestamp,
             'Unreachable_Count': 0,
+            'Submitted': False,
             'Passed': False
         }
 
