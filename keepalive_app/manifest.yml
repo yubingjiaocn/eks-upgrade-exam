@@ -10,12 +10,15 @@ metadata:
   name: exam-role
 rules:
 - apiGroups: [""]
-  resources: ["pods", "nodes"]
+  resources: ["pods", "nodes", "namespaces"]
   verbs: ["get", "watch", "list"]
-- apiGroups: ["apps"]  
+- apiGroups: ["apps"]
   resources: ["deployments", "daemonsets"]
   verbs: ["get", "watch", "list"]
---- 
+- apiGroups: ["policy"]
+  resources: ["poddisruptionbudgets"]
+  verbs: ["get", "watch", "list"]
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
@@ -26,8 +29,8 @@ subjects:
   name: default
   namespace: exam
 roleRef:
-  kind: ClusterRole 
-  name: exam-role 
+  kind: ClusterRole
+  name: exam-role
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: apps/v1
@@ -49,7 +52,7 @@ spec:
       - env:
         - name: CANDIDATE_NAME
           value: Anonymous
-        image: public.ecr.aws/i6v0m5n6/exam-keepalive:0.2
+        image: public.ecr.aws/i6v0m5n6/exam-keepalive:0.3
         name: exam-keepalive
         ports:
         - containerPort: 5000
@@ -67,7 +70,7 @@ spec:
   type: ClusterIP
   selector:
     app: exam-keepalive
----        
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
