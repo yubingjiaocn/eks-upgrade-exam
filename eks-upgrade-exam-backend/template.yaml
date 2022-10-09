@@ -5,7 +5,7 @@ Description: >
 
 Resources:
   AddCandidateFunction:
-    Type: AWS::Serverless::Function 
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: add_candidate/
       Handler: app.lambda_handler
@@ -14,19 +14,19 @@ Resources:
         - x86_64
       Events:
         AddCandidate:
-          Type: Api 
+          Type: Api
           Properties:
             Path: /add_candidate
             Method: post
       Environment:
         Variables:
-          TABLE_NAME: !Ref ExamTable      
+          TABLE_NAME: !Ref ExamTable
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref ExamTable      
+            TableName: !Ref ExamTable
 
   ScrapeFunction:
-    Type: AWS::Serverless::Function 
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: scrape/
       Handler: app.lambda_handler
@@ -43,13 +43,13 @@ Resources:
             Enabled: false
       Environment:
         Variables:
-          TABLE_NAME: !Ref ExamTable             
+          TABLE_NAME: !Ref ExamTable
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref ExamTable      
+            TableName: !Ref ExamTable
 
   SubmissionFunction:
-    Type: AWS::Serverless::Function 
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: submission/
       Handler: app.lambda_handler
@@ -58,24 +58,36 @@ Resources:
         - x86_64
       Events:
         Submission:
-          Type: Api 
+          Type: Api
           Properties:
             Path: /submit
             Method: post
       Environment:
         Variables:
-          TABLE_NAME: !Ref ExamTable                  
+          TABLE_NAME: !Ref ExamTable
+          SUBMISSION_TABLE_NAME: !Ref ExamSubmissionTable
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref ExamTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ExamSubmissionTable
 
-  ExamTable: 
+  ExamTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
-      PrimaryKey: 
+      PrimaryKey:
         Name: AWSAccountID
         Type: String
       TableName: ExamTable
+
+  ExamSubmissionTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: AWSAccountID
+        Type: String
+      TableName: ExamSubmissionTable
+
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function

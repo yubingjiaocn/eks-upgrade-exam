@@ -23,12 +23,12 @@ def judge(item, url):
         result["Cluster_Update"] = True
     else:
         result["Cluster_Update"] = False
-        passed = False   
+        passed = False
 
     # Check node version
     result["Node_All_Update"] = True
     for node in item["Nodes_Ver"]:
-        if node < 22: 
+        if node < 22:
             result["Node_All_Update"] = False
             passed = False
 
@@ -41,7 +41,7 @@ def judge(item, url):
 
     # Check if test application is deployed
     try:
-        access_check = session.get(url, timeout=(0.3, 1)) 
+        access_check = session.get(url, timeout=(0.3, 1))
         if access_check.ok:
             if access_check.text == "{'test': 'OK'}":
                 result["Access_Check"] = True
@@ -50,11 +50,33 @@ def judge(item, url):
                 passed = False
     except requests.exceptions.RequestException:
             result["Access_Check"] = False
-            passed = False 
+            passed = False
 
     result["Unreachable_Count"] = item["Unreachable_Count"]
-    if item["Unreachable_Count"] > 0: 
-        passed = False
+
+    # Check if PDB is configurated
+    if item["PDB"] > 0:
+        result["PDB_Set"] = True
+    else:
+        result["PDB_Set"] = False
+
+    # Check if Readiness Gate on Pod is set
+    if item["ReadinessGate_Pod"]:
+        result["ReadinessGate_Pod"] = True
+    else:
+        result["ReadinessGate_Pod"] = False
+
+    # Check if Readiness Gate on Pod is set
+    if item["preStopHook"]:
+        result["preStopHook"] = True
+    else:
+        result["preStopHook"] = False
+
+    # Check if auto inject Readiness Gate on Namespace is set
+    if item["ReadinessGate_NS"]:
+        result["ReadinessGate_NS"] = True
+    else:
+        result["ReadinessGate_NS"] = False
 
     result["Final"] = passed
     return result
@@ -66,13 +88,13 @@ def generate_output(name, result):
     if result["Cluster_Update"]:
         result_str += "* Cluster control plane is updated\n"
     else:
-        result_str += "* Cluster control plane is not updated\n" 
+        result_str += "* Cluster control plane is not updated\n"
 
     # Check node version
     if result["Node_All_Update"]:
         result_str += "* All worker nodes are updated\n"
     else:
-        result_str += "* Not all worker nodes are updated\n" 
+        result_str += "* Not all worker nodes are updated\n"
 
     # Check kube-proxy version
     if result["Kube_Proxy_Update"]:
@@ -91,11 +113,37 @@ def generate_output(name, result):
 
     if result["Final"]:
         result_str += "Congratulations! You have passed the exam. \n"
-    else: 
+        result_str += "Now let's check some extra configuration. \n"
+
+        # Check PDB
+        if result["PDB_Set"]:
+            result_str += "* PodDisruptionBudget is set.\n"
+        else:
+            result_str += "* PodDisruptionBudget is not set\n"
+
+        # Check Readiness Gate
+
+        if result["ReadinessGate_NS"]:
+            if result["ReadinessGate_Pod"]:
+                result_str += "* Readiness Gate is set on Pod and Namespace.\n"
+            else:
+                result_str += "* Readiness Gate is set on Namespace but not on Pod. Actually it's not working...\n"
+        else:
+            result_str += "* Readiness Gate is not set.\n"
+
+        # Check pre-stop hook
+
+        if result["preStopHook"]:
+            result_str += "* Pre-stop hook for pod is set.\n"
+        else:
+            result_str += "* Pre-stop hook for pod is not set.\n"
+
+    else:
         result_str += "Something went wrong. Check the output and feel free to try again. \n"
     return result_str
 
 def lambda_handler(event, context):
+    timestamp = int(time.time())
     req = json.loads(event['body'])
 
     awsaccountid = req['AWSAccountID']
@@ -103,16 +151,22 @@ def lambda_handler(event, context):
 
     query = table.get_item(Key={'AWSAccountID': str(awsaccountid)})['Item']
 
+    print(awsaccountid + "has submitted on " + timestamp)
+
     result = judge(query, url)
 
+    print(json.dumps(result))
+
     if result["Final"]:
-        timestamp = int(time.time())
+
         table.update_item(Key={'AWSAccountID': awsaccountid},
-                      UpdateExpression='SET Submitted = :val1, Submitted_Time = :val2',
+                      UpdateExpression='SET Passed = :val1, Submitted_Time = :val2',
                       ExpressionAttributeValues={':val1': True, ':val2': timestamp})
 
     result_str = generate_output(query['Name'], result)
-    
+
+    print(result_str)
+
     return {
         "body": result_str,
         "statusCode": 200
