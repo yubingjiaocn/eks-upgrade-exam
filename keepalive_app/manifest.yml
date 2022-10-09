@@ -52,6 +52,7 @@ spec:
       - env:
         - name: CANDIDATE_NAME
           value: Anonymous
+        imagePullPolicy: Always
         image: public.ecr.aws/i6v0m5n6/exam-keepalive:0.3
         name: exam-keepalive
         ports:
